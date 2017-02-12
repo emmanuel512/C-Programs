@@ -1,0 +1,14 @@
+This is C++ program that parses through a given file, and prints out each unique line as well as how many times it occurs
+
+Sample input:
+A line
+Line b
+This is line c
+Line b
+This is line c
+Line b
+
+Sample output:
+1 A line
+3 Line b
+2 This is line c
