@@ -1,6 +1,5 @@
 /***************Pig Game Class*************/
 #include <iostream>
-#include <cstdlib>
 #include <string>
 #include <vector>
 #include <iomanip>
@@ -23,7 +22,7 @@ private:
 
 public:
 	//Constructor
-	Pig(string &a, string &b, bool startTurn)
+	Pig(string a, string b, bool startTurn)
 	{
 		std::cout << "_______________ Pig Game has been created ______________" << std::endl;
 		players.push_back(a); //Add Human 
