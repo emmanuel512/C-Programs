@@ -10,8 +10,9 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
-#define PORTNUM 4010
+#define PORTNUM 4008
 #define MAX_MESSAGE_LENGTH 50
+#define MAX_CONNECTIONS 4
 
 void print_incoming_address(struct sockaddr_in *host)
 {
@@ -56,7 +57,7 @@ int main(int argc, char **argv)
 	printf("Listening for incoming connections.....\n");
 
 	// Listen for incoming connections and que up only one 
-	error = listen(sockfd, 1);
+	error = listen(sockfd, MAX_CONNECTIONS);
 	if(error == -1)
 	{
 		printf("Error listening on socket\n");
@@ -71,35 +72,80 @@ int main(int argc, char **argv)
 
 	// Clear send and recv buffer
 
-	while(1)
+	for(int i = 0; i < MAX_CONNECTIONS; i++)
 	{
-		// Send and Receive messages 
-		printf("Enter server msg: ");
-		
-		fgets(sendMsg, MAX_MESSAGE_LENGTH, stdin);
-
-		int msg_len = strlen(sendMsg);
-		send(newfd, sendMsg, msg_len, 0);
-
-		printf("\n");
-
-		recv(newfd, recvBuf, MAX_MESSAGE_LENGTH, 0);
-		
-		// Check if msg is bye
-		if(strcmp(recvBuf, "Good Bye\n") == 0)
+		while(newfd)
 		{
-			// Send bye message and close socket connection
+			if(i != MAX_CONNECTIONS-1)
+			{
+				// Send and Receive messages 
+				printf("Enter server msg: ");
+				
+				// clear sendMsg 
+				memset(sendMsg, 0, sizeof(sendMsg));
+				fgets(sendMsg, MAX_MESSAGE_LENGTH, stdin);
 
-			char *bye_message = "Server: Ok, Good Bye!\n";
-			short msg_len = strlen(bye_message);
-			send(newfd, bye_message, msg_len, 0);
+				short msg_len = strlen(sendMsg);
+				send(newfd, sendMsg, msg_len, 0);
 
-			// Close connection
-			close(newfd);
-			close(sockfd);
-			exit(1);
-		} 
-		printf("Client: %s\n", recvBuf);
+				printf("\n");
+
+				// clear recvBuff 
+				memset(recvBuf, 0, sizeof(recvBuf));
+				recv(newfd, recvBuf, MAX_MESSAGE_LENGTH, 0);
+				
+				// Check if msg is bye
+				if(strcmp(recvBuf, "Good Bye\n") == 0)
+				{
+					// Send bye message and close socket connection
+
+					char *bye_message = "Server: Ok, Good Bye!\n";
+					short msg_len = strlen(bye_message);
+					send(newfd, bye_message, msg_len, 0);
+
+					printf("\nEnd of client program\n");
+					// Close connection
+					close(newfd);
+					printf("Accept next pending connection request...\n");
+					socklen_t addr_size = sizeof(their_addr);
+					newfd =  accept(sockfd, (struct sockaddr *)&their_addr, &addr_size);
+					print_incoming_address(&their_addr); 
+					break;  
+				} 
+				printf("Client: %s\n", recvBuf);
+			}
+					// Send and Receive messages 
+			printf("Enter server msg: ");
+			
+			// clear sendMsg 
+			memset(sendMsg, 0, sizeof(sendMsg));
+			fgets(sendMsg, MAX_MESSAGE_LENGTH, stdin);
+
+			short msg_len = strlen(sendMsg);
+			send(newfd, sendMsg, msg_len, 0);
+
+			printf("\n");
+
+			// clear recvBuff 
+			memset(recvBuf, 0, sizeof(recvBuf));
+			recv(newfd, recvBuf, MAX_MESSAGE_LENGTH, 0);
+			
+			// Check if msg is bye
+			if(strcmp(recvBuf, "Good Bye\n") == 0)
+			{
+				// Send bye message and close socket connection
+
+				char *bye_message = "Server: Ok, Good Bye!\n";
+				short msg_len = strlen(bye_message);
+				send(newfd, bye_message, msg_len, 0);
+
+				printf("\nEnd of server program\n");
+				// Close connection
+				close(newfd);
+				close(sockfd);
+				exit(1);
+			} 
+			printf("Client: %s\n", recvBuf);
+		}
 	}
-
 }
