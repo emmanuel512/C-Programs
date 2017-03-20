@@ -26,7 +26,7 @@ int main(int argc, char **argv)
 	struct sockaddr_in dest;
 	memset(&dest, 0, sizeof(dest));
 	dest.sin_family = AF_INET;
-	dest.sin_port = htons(4010);
+	dest.sin_port = htons(4008);
 	dest.sin_addr.s_addr = htonl(INADDR_ANY);
 	socklen_t dest_socksize = sizeof(dest);
 
@@ -47,11 +47,15 @@ int main(int argc, char **argv)
 
 		printf("\n");
 
+		// clear recvBuf 
+		memset(recvBuf, 0, sizeof(recvBuf));
 		recv(sockfd, recvBuf, MAX_MESSAGE_LENGTH, 0);
 		printf("Server: %s\n", recvBuf);
 		
 		printf("Enter client msg: ");
 		
+		// clear sendMsg Buffer
+		memset(sendMsg, 0, sizeof(sendMsg));
 		fgets(sendMsg, MAX_MESSAGE_LENGTH, stdin);
 		
 		// Check if is bye message
@@ -60,7 +64,7 @@ int main(int argc, char **argv)
 		{
 			// Send bye message and close socket
 			
-			int msg_len = strlen(sendMsg);
+			short msg_len = strlen(sendMsg);
 			send(sockfd, sendMsg, msg_len, 0);
 					
 			recv(sockfd, recvBuf, MAX_MESSAGE_LENGTH, 0);
@@ -72,7 +76,7 @@ int main(int argc, char **argv)
 			exit(1);
 		}
 
-		int msg_len = strlen(sendMsg);
+		short msg_len = strlen(sendMsg);
 		send(sockfd, sendMsg, msg_len, 0);
 	}
 
